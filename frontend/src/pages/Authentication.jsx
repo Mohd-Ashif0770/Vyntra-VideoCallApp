@@ -1,29 +1,39 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { AuthContext } from "../contexts/authContext";
 
-export  function Authentication() {
-  // individual input states
+export function Authentication() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [formState, setFormState] = useState("signin"); // "signin" or "signup"
 
-  // form mode state: "signin" or "signup"
-  const [formState, setFormState] = useState("signin");
+  const { handleLogin, handleRegister } = useContext(AuthContext);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (formState === "signin") {
-      console.log("Sign In Data:", { username, password });
-      // TODO: handle sign-in API call
-    } else {
-      console.log("Sign Up Data:", { name, username, password });
-      // TODO: handle sign-up API call
+    try {
+      if (formState === "signin") {
+        await handleLogin(username, password);
+      } else {
+        await handleRegister(name, username, password);
+
+        // ✅ After successful registration:
+        // Show success toast (already handled in context)
+        // Then automatically switch to Sign In form
+        setFormState("signin");
+        setName("");
+        setUsername("");
+        setPassword("");
+      }
+    } catch (err) {
+      console.error("Authentication error:", err);
+      // Toastify handles error, no alert needed
     }
   };
 
   const toggleForm = () => {
     setFormState(formState === "signin" ? "signup" : "signin");
-    // clear fields on switch (optional)
     setName("");
     setUsername("");
     setPassword("");
@@ -40,7 +50,7 @@ export  function Authentication() {
               </h3>
 
               <form onSubmit={handleSubmit}>
-                {/* Name field only visible in Sign Up */}
+                {/* Full name only in Sign Up */}
                 {formState === "signup" && (
                   <div className="mb-3">
                     <label htmlFor="name" className="form-label fw-semibold">
@@ -101,6 +111,7 @@ export  function Authentication() {
                   <p>
                     Don’t have an account?{" "}
                     <button
+                      type="button"
                       className="btn btn-link p-0"
                       onClick={toggleForm}
                     >
@@ -111,6 +122,7 @@ export  function Authentication() {
                   <p>
                     Already have an account?{" "}
                     <button
+                      type="button"
                       className="btn btn-link p-0"
                       onClick={toggleForm}
                     >

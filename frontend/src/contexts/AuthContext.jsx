@@ -1,7 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState } from "react";
-import axios from "axios";
+import axios, { HttpStatusCode } from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export const AuthContext = createContext(null);
 
@@ -14,8 +15,15 @@ export const AuthProvider = ({ children }) => {
 
   // initialize from localStorage if available
   const [userData, setUserData] = useState(() => {
-    const saved = localStorage.getItem("userData");
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem("userData");
+      if (!saved || saved === "undefined") return null;
+      return JSON.parse(saved);
+    } catch (err) {
+      console.error("Failed to parse userData from localStorage:", err);
+      localStorage.removeItem("userData");
+      return null;
+    }
   });
 
   const handleRegister = async (name, username, password) => {
@@ -23,10 +31,36 @@ export const AuthProvider = ({ children }) => {
       const res = await client.post("/register", { name, username, password });
       setUserData(res.data.user);
       localStorage.setItem("userData", JSON.stringify(res.data.user));
+      toast.success("Registration successful!");
+    } catch (err) {
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Registration failed. Please try again.");
+      }
+      console.error("Registration error:", err);
+    }
+  };
+
+  const handleLogin = async (username, password) => {
+    try {
+      const res = await client.post("/login", { username, password });
+      setUserData(res.data.user);
+
+      if (res.status === HttpStatusCode.Ok) {
+        localStorage.setItem("token", res.data.token);
+      }
+
+      toast.success("Login successful!");
       navigate("/dashboard");
     } catch (err) {
-      console.error("Registration failed:", err);
-      throw err;
+      // 👇 Catch backend error messages safely
+      if (err.response && err.response.data && err.response.data.message) {
+        toast.error(err.response.data.message);
+      } else {
+        toast.error("Login failed. Please try again.");
+      }
+      console.error("Login error:", err);
     }
   };
 
@@ -34,13 +68,10 @@ export const AuthProvider = ({ children }) => {
     userData,
     setUserData,
     handleRegister,
+    handleLogin,
   };
 
-  return (
-    <AuthContext.Provider value={data}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={data}>{children}</AuthContext.Provider>;
 };
 
 // optional helper hook
