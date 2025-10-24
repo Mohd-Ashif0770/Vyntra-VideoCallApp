@@ -1,63 +1,71 @@
 import { useEffect, useRef, useState } from "react";
-import { TextField, Button, IconButton, Badge } from "@mui/material";
-import { Videocam, VideocamOff, Mic, MicOff, CallEnd, ScreenShare, StopScreenShare, Chat } from "@mui/icons-material";
-
+import {
+  TextField,
+  Button,
+  IconButton,
+  Badge,
+} from "@mui/material";
+import {
+  Videocam,
+  VideocamOff,
+  Mic,
+  MicOff,
+  CallEnd,
+  ScreenShare,
+  StopScreenShare,
+  Chat,
+} from "@mui/icons-material";
 import { io } from "socket.io-client";
 import "../styles/VideoMeet.css";
 
-// =========================
+// ===============================
 // 🌐 Global Configurations
-// =========================
-const SERVER_URL = "http://localhost:8080"; // Backend signaling server
-let connections = {}; // Stores all active RTCPeerConnections
-
-// WebRTC ICE (STUN) server setup
+// ===============================
+const SERVER_URL = "http://localhost:8080";
+let connections = {}; // Store all RTCPeerConnections
 const peerConfigConnections = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
-// =========================
-// 🎥 Main VideoMeet Component
-// =========================
+// ===============================
+// 🎥 Main Component
+// ===============================
 export default function VideoMeet() {
   // 🔗 Refs
-  const socketRef = useRef(); // Socket.io instance
-  const socketIdRef = useRef(); // Stores unique socket ID
-  const localVideoRef = useRef(); // Local video DOM element
-  const videoRef = useRef([]); // Tracks all remote video refs
+  const socketRef = useRef();
+  const socketIdRef = useRef();
+  const localVideoRef = useRef();
+  const videoRef = useRef([]);
 
-  // 🎚️ State Variables
+  // 🎚️ States
   const [videoAvailable, setVideoAvailable] = useState(true);
   const [audioAvailable, setAudioAvailable] = useState(true);
   const [newMessage, setNewMessage] = useState(20);
   const [video, setVideo] = useState(true);
   const [audio, setAudio] = useState(true);
+  const [screen, setScreen] = useState(false);
   const [screenAvailable, setScreenAvailable] = useState(false);
-  const [videos, setVideos] = useState([]); // All remote participants
+  const [videos, setVideos] = useState([]);
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
 
-  // ==================================================
-  // 🔒 Request Camera, Mic, and Screen Permissions
-  // ==================================================
+  // ===============================
+  // 🔒 Request Permissions
+  // ===============================
   const getPermissions = async () => {
     try {
-      // Request camera access
       const videoPermission = await navigator.mediaDevices.getUserMedia({
         video: true,
       });
       setVideoAvailable(!!videoPermission);
 
-      // Request microphone access
       const audioPermission = await navigator.mediaDevices.getUserMedia({
         audio: true,
       });
       setAudioAvailable(!!audioPermission);
 
-      // Check for screen sharing API
       setScreenAvailable(!!navigator.mediaDevices.getDisplayMedia);
 
-      // Initialize local stream
       if (videoPermission || audioPermission) {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: videoAvailable,
@@ -66,9 +74,7 @@ export default function VideoMeet() {
         window.localStream = stream;
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
-          await localVideoRef.current
-            .play()
-            .catch((err) => console.error("Autoplay error:", err));
+          await localVideoRef.current.play();
         }
       }
     } catch (err) {
@@ -80,33 +86,25 @@ export default function VideoMeet() {
     getPermissions();
   }, []);
 
-  // ==================================================
-  // 📡 Get User Media Stream (Start/Stop)
-  // ==================================================
+  // ===============================
+  // 🎥 Start/Stop User Media
+  // ===============================
   const getUserMedia = () => {
     if ((video && videoAvailable) || (audio && audioAvailable)) {
-      // Start camera + mic
       navigator.mediaDevices
         .getUserMedia({ video, audio })
         .then((stream) => {
           window.localStream = stream;
           if (localVideoRef.current) {
             localVideoRef.current.srcObject = stream;
-            localVideoRef.current
-              .play()
-              .catch((err) => console.error("Autoplay error:", err));
+            localVideoRef.current.play().catch((err) => console.error(err));
           }
           console.log("Local stream started ✅");
         })
         .catch((err) => console.error("Error:", err.message));
     } else {
-      // Stop all tracks
-      try {
-        const tracks = localVideoRef.current?.srcObject?.getTracks();
-        tracks?.forEach((track) => track.stop());
-      } catch (err) {
-        console.error("Error stopping tracks:", err.message);
-      }
+      const tracks = localVideoRef.current?.srcObject?.getTracks();
+      tracks?.forEach((track) => track.stop());
     }
   };
 
@@ -114,23 +112,18 @@ export default function VideoMeet() {
     if (video !== undefined && audio !== undefined) getUserMedia();
   }, [audio, video]);
 
-  // ==================================================
+  // ===============================
   // 📩 Handle Incoming Socket Signals
-  // Ensure a RTCPeerConnection exists for the remote peer before using it.
-  // This lets a joining client respond to offers even if it hasn't created
-  // a connection object yet.
-  // ==================================================
+  // ===============================
   const gotMessageFromServer = (fromId, message) => {
     const signal = JSON.parse(message);
-
-    // Ignore own messages
     if (fromId === socketIdRef.current) return;
 
-    // Lazily create a connection object for this peer if it doesn't exist
+    // Create connection if not exists
     if (!connections[fromId]) {
       connections[fromId] = new RTCPeerConnection(peerConfigConnections);
 
-      // forward ICE candidates to the remote peer
+      // ICE candidates
       connections[fromId].onicecandidate = (event) => {
         if (event.candidate) {
           socketRef.current.emit(
@@ -141,12 +134,14 @@ export default function VideoMeet() {
         }
       };
 
-      // modern ontrack handler (use streams[0])
+      // Remote stream
       connections[fromId].ontrack = (event) => {
         const remoteStream = event.streams && event.streams[0];
         if (!remoteStream) return;
 
-        const videoExists = videoRef.current.find((v) => v.socketId === fromId);
+        const videoExists = videoRef.current.find(
+          (v) => v.socketId === fromId
+        );
         if (videoExists) {
           setVideos((prev) =>
             prev.map((v) =>
@@ -165,19 +160,15 @@ export default function VideoMeet() {
         }
       };
 
-      // add local tracks if available
+      // Add local tracks
       if (window.localStream) {
-        try {
-          window.localStream.getTracks().forEach((track) => {
-            connections[fromId].addTrack(track, window.localStream);
-          });
-        } catch (err) {
-          console.error("Error adding local tracks:", err);
-        }
+        window.localStream.getTracks().forEach((track) => {
+          connections[fromId].addTrack(track, window.localStream);
+        });
       }
     }
 
-    // Handle SDP (offer/answer)
+    // Handle SDP
     if (signal.sdp) {
       connections[fromId]
         .setRemoteDescription(new RTCSessionDescription(signal.sdp))
@@ -204,7 +195,7 @@ export default function VideoMeet() {
         .catch(console.error);
     }
 
-    // Handle ICE candidate
+    // Handle ICE
     if (signal.ice) {
       connections[fromId]
         .addIceCandidate(new RTCIceCandidate(signal.ice))
@@ -212,9 +203,9 @@ export default function VideoMeet() {
     }
   };
 
-  // ==================================================
+  // ===============================
   // 🔌 Connect to Socket.IO Server
-  // ==================================================
+  // ===============================
   const connectToSocketServer = () => {
     socketRef.current = io(SERVER_URL, { secure: false });
 
@@ -226,16 +217,11 @@ export default function VideoMeet() {
       socketRef.current.emit("join-call", window.location.href);
       socketIdRef.current = socketRef.current.id;
 
-      // When a user leaves
       socketRef.current.on("user-left", (id) => {
         setVideos((prev) => prev.filter((v) => v.socketId !== id));
       });
 
-      // When a new user joins: existing peers should create an offer to the
-      // new peer. The server sends `id` (the new user's socket id) and the
-      // full clients list.
       socketRef.current.on("user-joined", (id, clients) => {
-        // Create (or reuse) a connection object for the joining peer
         if (!connections[id]) {
           connections[id] = new RTCPeerConnection(peerConfigConnections);
 
@@ -253,7 +239,9 @@ export default function VideoMeet() {
             const remoteStream = event.streams && event.streams[0];
             if (!remoteStream) return;
 
-            const videoExists = videoRef.current.find((v) => v.socketId === id);
+            const videoExists = videoRef.current.find(
+              (v) => v.socketId === id
+            );
             if (videoExists) {
               setVideos((prev) =>
                 prev.map((v) =>
@@ -273,17 +261,12 @@ export default function VideoMeet() {
           };
 
           if (window.localStream) {
-            try {
-              window.localStream.getTracks().forEach((track) => {
-                connections[id].addTrack(track, window.localStream);
-              });
-            } catch (err) {
-              console.error("Error adding local tracks:", err);
-            }
+            window.localStream.getTracks().forEach((track) => {
+              connections[id].addTrack(track, window.localStream);
+            });
           }
         }
 
-        // If I'm an existing peer, create an offer to the newly joined client
         if (socketIdRef.current && socketIdRef.current !== id) {
           connections[id]
             .createOffer()
@@ -303,9 +286,9 @@ export default function VideoMeet() {
     });
   };
 
-  // ==================================================
-  // ▶️ Entry Point: Join Meeting
-  // ==================================================
+  // ===============================
+  // ▶️ Join Meeting
+  // ===============================
   const getMedia = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -313,13 +296,11 @@ export default function VideoMeet() {
         audio,
       });
       window.localStream = stream;
-
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
         await localVideoRef.current.play();
       }
-
-      connectToSocketServer(); // Connect only after stream ready
+      connectToSocketServer();
     } catch (err) {
       console.error("Media error:", err);
     }
@@ -330,84 +311,148 @@ export default function VideoMeet() {
     getMedia();
   };
 
-  // ==================================================
+  // ===============================
+  // 🖥️ Screen Sharing
+  // ===============================
+  const getDisplayMediaSuccess = (stream) => {
+    try {
+      window.localStream.getTracks().forEach((track) => track.stop());
+    } catch (e) {
+      console.error("Error stopping old tracks:", e);
+    }
+
+    window.localStream = stream;
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = stream;
+    }
+
+    // Replace video track for each peer
+    Object.keys(connections).forEach((id) => {
+      const sender = connections[id]
+        .getSenders()
+        .find((s) => s.track && s.track.kind === "video");
+
+      if (sender && stream.getVideoTracks().length > 0) {
+        sender
+          .replaceTrack(stream.getVideoTracks()[0])
+          .then(() => console.log(`✅ Replaced video track for ${id}`))
+          .catch((err) => console.error("replaceTrack error:", err));
+      }
+    });
+
+    // Stop sharing -> return to camera
+    stream.getTracks().forEach((track) => {
+      track.onended = () => {
+        setScreen(false);
+        getUserMedia();
+      };
+    });
+  };
+
+  const getDisplayMedia = () => {
+    if (screen && navigator.mediaDevices.getDisplayMedia) {
+      navigator.mediaDevices
+        .getDisplayMedia({ video: true })
+        .then(getDisplayMediaSuccess)
+        .catch((e) => console.error("Screen share error:", e));
+    }
+  };
+
+  useEffect(() => {
+    if (screen !== undefined) getDisplayMedia();
+  }, [screen]);
+
+  const handleScreen = () => {
+    setScreen((prev) => !prev);
+  };
+
+  // ===============================
   // 🖼️ UI Layout
-  // ==================================================
- return (
-  <div className="videomeet-container text-center">
-    {askForUsername ? (
-      // 🏠 Lobby
-      <div className="lobby">
-        <h2>Enter the Lobby</h2>
-
-        <TextField
-          id="outlined-basic"
-          label="Username"
-          variant="outlined"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          className="username-input"
-        />
-
-        <Button variant="contained" onClick={connect} className="connect-btn">
-          Connect
-        </Button>
-
-        <div className="lobby-video-wrapper">
-          <video ref={localVideoRef} autoPlay muted playsInline className="lobby-video" />
-          
+  // ===============================
+  return (
+    <div className="videomeet-container text-center">
+      {askForUsername ? (
+        // 🏠 Lobby
+        <div className="lobby">
+          <h2>Enter the Lobby</h2>
+          <TextField
+            required
+            id="outlined-basic"
+            label="Username"
+            variant="outlined"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className="username-input"
+            InputProps={{ style: { color: "white" } }}
+            InputLabelProps={{ style: { color: "#ccc" } }}
+          />
+          <Button variant="contained" onClick={connect} className="connect-btn">
+            Connect
+          </Button>
+          <div className="lobby-video-wrapper">
+            <video
+              ref={localVideoRef}
+              autoPlay
+              muted
+              playsInline
+              className="lobby-video"
+            />
+          </div>
         </div>
-      </div>
-    ) : (
-      // 📞 Meeting Room
-      <div className="meetVideoContainer">
-        <div className="buttonContainer">
-          <IconButton className="control-btn" onClick={() => setVideo(!video)}>
-            {video ? <Videocam /> : <VideocamOff />}
-          </IconButton>
-
-          <IconButton className="control-btn end-call">
-            <CallEnd />
-          </IconButton>
-
-          <IconButton className="control-btn" onClick={() => setAudio(!audio)}>
-            {audio ? <Mic /> : <MicOff />}
-          </IconButton>
-
-          <IconButton className="control-btn">
-            {screen ? <ScreenShare /> : <StopScreenShare />}
-          </IconButton>
-
-          <Badge badgeContent={newMessage} color="warning" max={999}>
-            <IconButton className="control-btn">
-              <Chat />
+      ) : (
+        // 📞 Meeting Room
+        <div className="meetVideoContainer">
+          <div className="buttonContainer">
+            <IconButton className="control-btn" onClick={() => setVideo(!video)}>
+              {video ? <Videocam /> : <VideocamOff />}
             </IconButton>
-          </Badge>
+
+            <IconButton className="control-btn end-call">
+              <CallEnd />
+            </IconButton>
+
+            <IconButton className="control-btn" onClick={() => setAudio(!audio)}>
+              {audio ? <Mic /> : <MicOff />}
+            </IconButton>
+
+            <IconButton className="control-btn" onClick={handleScreen}>
+              {screen ? <StopScreenShare /> : <ScreenShare />}
+            </IconButton>
+
+            <Badge badgeContent={newMessage} color="warning" max={999}>
+              <IconButton className="control-btn">
+                <Chat />
+              </IconButton>
+            </Badge>
+          </div>
+
+          {/* Local Video */}
+          <video
+            className="meetUserVideo"
+            ref={localVideoRef}
+            autoPlay
+            muted
+            playsInline
+          />
+
+          {/* Remote Participants */}
+          <div className="remoteVideosContainer">
+            {videos.map((video) => (
+              <div key={video.socketId}>
+                <video
+                  data-socket={video.socketId}
+                  ref={(ref) => {
+                    if (ref && video.stream) ref.srcObject = video.stream;
+                  }}
+                  autoPlay
+                  playsInline
+                  className="remoteVideo"
+                />
+              </div>
+            ))}
+          </div>
         </div>
-
-        {/* Local Video */}
-        <video className="meetUserVideo" ref={localVideoRef} autoPlay muted playsInline />
-        
-
-        {/* Remote Participants */}
-        <div className="remoteVideosContainer">
-          {videos.map((video) => (
-            <div key={video.socketId}>
-              <video
-                data-socket={video.socketId}
-                ref={(ref) => {
-                  if (ref && video.stream) ref.srcObject = video.stream;
-                }}
-                autoPlay
-                playsInline
-                className="remoteVideo"
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
-);
-
+      )}
+    </div>
+  );
 }
