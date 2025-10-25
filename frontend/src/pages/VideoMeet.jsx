@@ -37,14 +37,14 @@ export default function VideoMeet() {
   const [audioAvailable, setAudioAvailable] = useState(true);
   const [video, setVideo] = useState(true);
   const [audio, setAudio] = useState(true);
-  const [showModel, setShowModel] = useState(true);
+  const [showModel, setShowModel] = useState(false);
   const [screen, setScreen] = useState(false);
   const [screenAvailable, setScreenAvailable] = useState(false);
   const [videos, setVideos] = useState([]);
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
 
-  // Chat states
+  // Chat state
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
@@ -216,26 +216,27 @@ export default function VideoMeet() {
       socketRef.current.emit("join-call", window.location.href);
       socketIdRef.current = socketRef.current.id;
 
-      // Handle chat messages
+      // Chat messages from server
       socketRef.current.on("chat-message", (message, sender, senderId) => {
-        const newMsg = {
+        const msg = {
           content: message,
           sender,
           senderId,
           isSelf: senderId === socketIdRef.current,
         };
-        setMessages((prev) => [...prev, newMsg]);
+        setMessages((prev) => [...prev, msg]);
 
-        // Increment unread count if chat is hidden
         if (!showModel) {
-          setUnreadCount((prev) => prev + 1);
+          setUnreadCount((n) => n + 1);
         }
 
-        // Scroll to bottom
-        if (chatMessagesRef.current) {
-          chatMessagesRef.current.scrollTop =
-            chatMessagesRef.current.scrollHeight;
-        }
+        // Auto-scroll
+        setTimeout(() => {
+          if (chatMessagesRef.current) {
+            chatMessagesRef.current.scrollTop =
+              chatMessagesRef.current.scrollHeight;
+          }
+        }, 50);
       });
 
       socketRef.current.on("user-left", (id) => {
@@ -420,6 +421,65 @@ export default function VideoMeet() {
     if (screen !== undefined) getDisplayMedia();
   }, [screen]);
 
+  // Toggle screen sharing: start when `screen` is false, stop and revert to camera when true
+  const toggleScreenShare = async () => {
+    if (!screen) {
+      setScreen(true);
+      // start screen sharing (effect will call getDisplayMedia), but call directly to be explicit
+      getDisplayMedia();
+      return;
+    }
+
+    // Stop screen sharing and revert to camera
+    setScreen(false);
+    try {
+      // Stop current tracks (likely screen tracks)
+      try {
+        window.localStream.getTracks().forEach((t) => t.stop());
+      } catch {
+        /* ignore */
+      }
+
+      // Get camera+mic again
+      const newStream = await navigator.mediaDevices.getUserMedia({
+        video,
+        audio,
+      });
+      window.localStream = newStream;
+
+      if (localVideoRef.current) {
+        localVideoRef.current.srcObject = newStream;
+      }
+
+      // Replace outgoing video track for all peer connections
+      Object.keys(connections).forEach((id) => {
+        try {
+          const sender = connections[id]
+            .getSenders()
+            .find((s) => s.track && s.track.kind === "video");
+
+          if (sender && newStream.getVideoTracks().length > 0) {
+            sender.replaceTrack(newStream.getVideoTracks()[0]);
+          }
+        } catch (err) {
+          console.error("Error replacing track for", id, err);
+        }
+      });
+
+      // Force remote video refresh
+      setVideos((prev) =>
+        prev.map((v) => {
+          if (v.stream && v.stream.getVideoTracks().length > 0) {
+            return { ...v, stream: new MediaStream(v.stream.getTracks()) };
+          }
+          return v;
+        })
+      );
+    } catch (err) {
+      console.error("Error reverting to camera after screen share:", err);
+    }
+  };
+
   // ===============================
   // 🖼️ UI Layout
   // ===============================
@@ -456,18 +516,17 @@ export default function VideoMeet() {
       ) : (
         // 📞 Meeting Room
         <div className="meetVideoContainer">
-          {/* 💬 Chat Section */}
+          {/* Chat Section */}
+
           {showModel && (
             <div className="chatRoom shadow">
               <div className="chatHeader">
-                <h5 className="mb-0">
-                  <i className="fa-solid fa-comments me-2"></i>Group Chat
-                </h5>
+                <h5 className="mb-0">Group Chat</h5>
                 <IconButton
                   size="small"
                   onClick={() => {
                     setShowModel(false);
-                    setUnreadCount(0); // Clear unread when hiding
+                    setUnreadCount(0);
                   }}
                 >
                   <i className="fa-solid fa-xmark text-light"></i>
@@ -475,17 +534,24 @@ export default function VideoMeet() {
               </div>
 
               <div className="chatMessages" ref={chatMessagesRef}>
-                {messages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`chatMessage ${msg.isSelf ? "self" : ""}`}
-                  >
-                    <span className="sender">
-                      {msg.isSelf ? "You" : msg.sender}
-                    </span>
-                    <p>{msg.content}</p>
+                {messages.length === 0 ? (
+                  <div className="chatMessage">
+                    <span className="sender">System</span>
+                    <p>No messages yet. Say hello 👋</p>
                   </div>
-                ))}
+                ) : (
+                  messages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`chatMessage ${msg.isSelf ? "self" : ""}`}
+                    >
+                      <span className="sender">
+                        {msg.isSelf ? "You" : msg.sender}
+                      </span>
+                      <p>{msg.content}</p>
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="chatInputBox">
@@ -500,7 +566,7 @@ export default function VideoMeet() {
                       socketRef.current.emit(
                         "chat-message",
                         newMessage.trim(),
-                        username
+                        username || "Anonymous"
                       );
                       setNewMessage("");
                     }
@@ -515,7 +581,7 @@ export default function VideoMeet() {
                       socketRef.current.emit(
                         "chat-message",
                         newMessage.trim(),
-                        username
+                        username || "Anonymous"
                       );
                       setNewMessage("");
                     }
@@ -546,10 +612,7 @@ export default function VideoMeet() {
               {audio ? <Mic /> : <MicOff />}
             </IconButton>
 
-            <IconButton
-              className="control-btn"
-              onClick={() => setVideo(!video)}
-            >
+            <IconButton className="control-btn" onClick={toggleScreenShare}>
               {screen ? <StopScreenShare /> : <ScreenShare />}
             </IconButton>
 
@@ -558,7 +621,7 @@ export default function VideoMeet() {
                 className="control-btn"
                 onClick={() => {
                   setShowModel(!showModel);
-                  setUnreadCount(0); // Clear unread when opening chat
+                  setUnreadCount(0);
                 }}
               >
                 <Chat />

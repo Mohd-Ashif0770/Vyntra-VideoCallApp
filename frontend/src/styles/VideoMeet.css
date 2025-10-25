@@ -231,6 +231,7 @@ body {
 .chatMessage {
   margin-bottom: 12px;
   max-width: 80%;
+  text-align: left;
   word-wrap: break-word;
 }
 
