@@ -41,6 +41,7 @@ export default function VideoMeet() {
   const [audio, setAudio] = useState(true);
   const [showModel, setShowModel] = useState(false);
   const [screen, setScreen] = useState(false);
+  const [screenAvailable, setScreenAvailable] = useState(false);
   const [videos, setVideos] = useState([]);
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
