@@ -1,4 +1,4 @@
-let isProduction = false;
+let isProduction = true;
 
 const serverUrl = isProduction ? "https://vyntra-videocall.onrender.com" : "http://localhost:8080";  
 
