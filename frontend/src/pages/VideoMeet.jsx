@@ -13,11 +13,12 @@ import {
 import { io } from "socket.io-client";
 import "../styles/VideoMeet.css";
 import { useNavigate } from "react-router-dom";
+import serverUrl from "../environment";
 
 // ===============================
 // 🌐 Global Configurations
 // ===============================
-const SERVER_URL = "http://localhost:8080";
+const SERVER_URL = serverUrl;
 let connections = {}; // Store all RTCPeerConnections
 const peerConfigConnections = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],

@@ -3,11 +3,12 @@ import { createContext, useContext, useState } from "react";
 import axios, { HttpStatusCode } from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import serverUrl from "../environment";
 
 export const AuthContext = createContext(null);
 
 const client = axios.create({
-  baseURL: "http://localhost:8080/api/users",
+  baseURL: `${serverUrl}/api/users`,
 });
 
 export const AuthProvider = ({ children }) => {

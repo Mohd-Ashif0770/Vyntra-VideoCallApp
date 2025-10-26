@@ -263,12 +263,3 @@
     opacity: 1;
   }
 }
-
-/* Enhanced button styles */
-.MuiButton-root {
-  /* No transitions for cleaner look */
-}
-
-.MuiIconButton-root {
-  /* No transitions for cleaner look */
-}
