@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TextField, Button, IconButton, Badge } from "@mui/material";
 import {
   Videocam,
@@ -13,7 +13,6 @@ import {
 import { io } from "socket.io-client";
 import "../styles/VideoMeet.css";
 import { useNavigate } from "react-router-dom";
-
 
 // ===============================
 // 🌐 Global Configurations
@@ -52,7 +51,7 @@ export default function VideoMeet() {
   const [unreadCount, setUnreadCount] = useState(0);
   const chatMessagesRef = useRef(null);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   // ===============================
   // 🔒 Request Permissions
@@ -113,9 +112,52 @@ export default function VideoMeet() {
     }
   };
 
+  // ===============================
+  // 🎤 Toggle Microphone
+  // ===============================
+  const toggleMicrophone = () => {
+    if (!window.localStream) return;
+
+    const audioTracks = window.localStream.getAudioTracks();
+
+    if (audioTracks.length > 0) {
+      // Toggle audio track enabled state
+      const newEnabledState = !audioTracks[0].enabled;
+      audioTracks.forEach((track) => {
+        track.enabled = newEnabledState;
+      });
+
+      // Update audio state
+      setAudio(newEnabledState);
+
+      // Update all peer connections
+      Object.keys(connections).forEach((id) => {
+        const sender = connections[id]
+          .getSenders()
+          .find((s) => s.track && s.track.kind === "audio");
+
+        if (sender && audioTracks.length > 0) {
+          sender.replaceTrack(audioTracks[0]);
+        }
+      });
+
+      console.log(`🎤 Microphone ${newEnabledState ? "ON" : "OFF"}`);
+    }
+  };
+
   useEffect(() => {
-    if (video !== undefined && audio !== undefined) getUserMedia();
-  }, [audio, video]);
+    // Only call getUserMedia when initially setting up or when video changes
+    // Don't call it when audio changes as we handle mic toggle separately
+    if (video !== undefined && audio !== undefined) {
+      // Only call getUserMedia if we don't have a stream yet or if video changed
+      if (
+        !window.localStream ||
+        video !== window.localStream.getVideoTracks().length > 0
+      ) {
+        getUserMedia();
+      }
+    }
+  }, [video]);
 
   // ===============================
   // 📩 Handle Incoming Socket Signals
@@ -331,6 +373,17 @@ export default function VideoMeet() {
   };
 
   const connect = () => {
+    // Validate username before connecting
+    if (!username.trim()) {
+      alert("Please enter a username to join the meeting");
+      return;
+    }
+
+    if (username.trim().length < 2) {
+      alert("Username must be at least 2 characters long");
+      return;
+    }
+
     setAskForUsername(false);
     getMedia();
   };
@@ -484,15 +537,16 @@ export default function VideoMeet() {
     }
   };
 
-  const handleCallEnd = ()=>{
-    try{
+  const handleCallEnd = () => {
+    try {
       let tracks = localVideoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop())
+      tracks.forEach((track) => track.stop());
+    } catch (e) {
+      console.log(e);
+    }
 
-    }catch(e){console.log(e)}
-
-    navigate("/home")
-  }
+    navigate("/home");
+  };
 
   // ===============================
   // 🖼️ UI Layout
@@ -502,21 +556,54 @@ export default function VideoMeet() {
       {askForUsername ? (
         // 🏠 Lobby
         <div className="lobby">
-          <h2>Enter the Lobby</h2>
-          <TextField
-            required
-            id="outlined-basic"
-            label="Username"
-            variant="outlined"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="username-input"
-            InputProps={{ style: { color: "white" } }}
-            InputLabelProps={{ style: { color: "#ccc" } }}
-          />
-          <Button variant="contained" onClick={connect} className="connect-btn">
-            Connect
-          </Button>
+          <div className="lobby-header">
+            <h2>Welcome to Vyntra</h2>
+            <p>Enter your name to join the meeting</p>
+          </div>
+
+          <div className="lobby-form">
+            <TextField
+              required
+              id="username-input"
+              label="Your Name"
+              variant="outlined"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="username-input"
+              error={username.length > 0 && username.length < 2}
+              helperText={
+                username.length > 0 && username.length < 2
+                  ? "Name must be at least 2 characters"
+                  : ""
+              }
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && username.trim().length >= 2) {
+                  connect();
+                }
+              }}
+              sx={{
+                "& label.Mui-focused": {
+                  color: "#a2424d", // change to any color
+                },
+                "& .MuiOutlinedInput-root": {
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#a2424d", // border color on focus
+                  },
+                },
+              }}
+            />
+
+            <Button
+              variant="contained"
+              onClick={connect}
+              className="connect-btn"
+              disabled={username.trim().length < 2}
+              size="large"
+            >
+              Join Meeting
+            </Button>
+          </div>
+
           <div className="lobby-video-wrapper">
             <video
               ref={localVideoRef}
@@ -525,6 +612,9 @@ export default function VideoMeet() {
               playsInline
               className="lobby-video"
             />
+            <div className="video-overlay">
+              <span>Your Camera Preview</span>
+            </div>
           </div>
         </div>
       ) : (
@@ -615,13 +705,16 @@ export default function VideoMeet() {
               {video ? <Videocam /> : <VideocamOff />}
             </IconButton>
 
-            <IconButton className="control-btn end-call" onClick={handleCallEnd}>
+            <IconButton
+              className="control-btn end-call"
+              onClick={handleCallEnd}
+            >
               <CallEnd />
             </IconButton>
 
             <IconButton
-              className="control-btn"
-              onClick={() => setAudio(!audio)}
+              className={`control-btn ${audio ? "mic-active" : "mic-muted"}`}
+              onClick={toggleMicrophone}
             >
               {audio ? <Mic /> : <MicOff />}
             </IconButton>
@@ -644,13 +737,21 @@ export default function VideoMeet() {
           </div>
 
           {/* Local Video */}
-          <video
-            className="meetUserVideo"
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-          />
+          <div className="local-video-container">
+            <video
+              className="meetUserVideo"
+              ref={localVideoRef}
+              autoPlay
+              muted
+              playsInline
+            />
+            {!audio && (
+              <div className="mic-muted-indicator">
+                <MicOff />
+                <span>Mic Off</span>
+              </div>
+            )}
+          </div>
 
           {/* Remote Participants */}
           <div className="remoteVideosContainer">

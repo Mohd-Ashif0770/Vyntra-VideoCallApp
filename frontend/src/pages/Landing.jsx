@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../styles/Landing.css";
 
@@ -6,22 +6,35 @@ export default function Landing() {
   return (
     <main className="landing-page">
       <header className="landing-nav">
-        <div className="landing-brand">
-          <Link to={"/home"} className="nav-logo">
-            Vyntra
-          </Link>
+        <div>
+          <div className="landing-brand">
+            <Link to={"/home"} className="nav-logo">
+              Vyntra
+            </Link>
+          </div>
+          <nav className="landing-nav-links">
+            <button
+              class="navbar-toggler"
+              type="button"
+              data-bs-toggle="collapse"
+              data-bs-target="#navbarTogglerDemo03"            
+            >
+              <span class="navbar-toggler-icon"></span>
+            </button>
+
+            {/* <div class="collapse navbar-collapse" id="navbarTogglerDemo03"> */}
+
+            <Link to={"/guest"} className="nav-link">
+              Join as Guest
+            </Link>
+            <Link to={"/auth"} className="nav-link">
+              Register
+            </Link>
+            <Link to={"/auth"} className="nav-link nav-link--button">
+              Login
+            </Link>
+          </nav>
         </div>
-        <nav className="landing-nav-links">
-          <Link to={"/guest"} className="nav-link">
-            Join as Guest
-          </Link>
-          <Link to={"/auth"} className="nav-link">
-            Register
-          </Link>
-          <Link to={"/auth"} className="nav-link nav-link--button">
-            Login
-          </Link>
-        </nav>
       </header>
 
       <section className="hero">

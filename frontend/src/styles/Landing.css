@@ -3,63 +3,133 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  /* new soft mint-blue gradient for a fresh look */
-  background: linear-gradient(180deg, #eefaf6 0%, #f6fbff 65%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  background-attachment: fixed;
   color: #0f172a;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial;
+  position: relative;
 }
 
-/* Nav */
+.landing-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+      circle at 20% 80%,
+      rgba(255, 182, 193, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(135, 206, 250, 0.3) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 40% 40%,
+      rgba(255, 218, 185, 0.2) 0%,
+      transparent 50%
+    );
+  pointer-events: none;
+}
+
+/* Nav container for full width */
 .landing-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+}
+
+/* Nav content wrapper */
+.landing-nav > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.5rem;
   max-width: 1200px;
-  width: 100%;
   margin: 0 auto;
-  /* translucent navbar with backdrop blur for a modern look */
-  background: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
-  border-radius: 10px;
-  backdrop-filter: blur(6px);
+  padding: 1rem 2rem;
+  width: 100%;
 }
 
 .nav-logo {
-  color: #0f172a;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-weight: 800;
-  font-size: 1.45rem;
+  font-size: 1.7rem;
   text-decoration: none;
   letter-spacing: -0.5px;
+  position: relative;
+  transition: transform 0.2s ease-out, background 0.2s ease-out;
+  will-change: transform;
+}
+
+.nav-logo:hover {
+  background: linear-gradient(135deg, #764ba2, #f093fb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  transform: scale(1.02);
 }
 
 .landing-nav-links {
   display: flex;
-  gap: 0.75rem;
+  gap: 1rem;
   align-items: center;
 }
 
 .nav-link {
-  color: rgba(15, 23, 42, 0.8);
+  color: #4a5568;
   text-decoration: none;
-  padding: 0.5rem 0.75rem;
-  border-radius: 6px;
-  font-weight: 500;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.2s ease-out, background 0.2s ease-out,
+    color 0.2s ease-out;
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
 }
 
-.nav-link:hover {
-  background: rgba(25, 118, 210, 0.06);
+.nav-link:not(.nav-link--button):hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  transform: translateY(-1px);
 }
 
 .nav-link--button {
-  background: linear-gradient(90deg, #1976d2, #2e7dff);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 6px 18px rgba(46, 125, 255, 0.18);
+  padding: 0.6rem 1.2rem;
+  border: none;
+  position: relative;
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+    background 0.2s ease-out;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  will-change: transform;
 }
 
-/* Hero */
+.nav-link--button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+  background: linear-gradient(135deg, #764ba2, #f093fb);
+}
+
+.nav-link--button:hover::before {
+  opacity: 1;
+}
+
+/* Hero section */
 .hero {
   display: flex;
   align-items: center;
@@ -67,8 +137,10 @@
   gap: 2rem;
   max-width: 1200px;
   width: 100%;
-  margin: 2.5rem auto;
-  padding: 1rem;
+  margin: 6rem auto 2.5rem;
+  padding: 1rem 2rem;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-left {
@@ -80,16 +152,21 @@
   font-size: 2.5rem;
   margin: 0 0 1rem 0;
   line-height: 1.05;
-  color: #07102a;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .accent {
-  color: #ff9839;
+  background: linear-gradient(135deg, #ffd700, #ff6b6b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
 }
 
 .hero-sub {
   margin-bottom: 1.5rem;
-  color: #4b5563;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.05rem;
 }
 
@@ -109,26 +186,65 @@
 }
 
 .btn-primary {
-  background: linear-gradient(90deg, #1976d2, #2e7dff);
+  background: linear-gradient(135deg, #ffd700, #ff6b6b);
   color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+    background 0.2s ease-out;
+  will-change: transform;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+  background: linear-gradient(135deg, #ffed4e, #ff5252);
 }
 
 .btn-outline {
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  color: #0f172a;
-  background: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+    background 0.2s ease-out;
+  will-change: transform;
+}
+
+.btn-outline:hover {
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
 }
 
 /* Hero right: use a high-quality background image from public folder */
 .hero-right {
   flex: 1;
   min-height: 420px;
-  border-radius: 12px;
-  background-image: url("/background.png");
+  border-radius: 20px;
+  background-image: url("/forHomePage.jpg");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
-  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+  box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-right::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(102, 126, 234, 0.1),
+    rgba(240, 147, 251, 0.1)
+  );
+  pointer-events: none;
 }
 
 /* Accessibility: ensure contrast for small screens */
@@ -160,6 +276,32 @@
 /* Small adjustments to avoid global overrides */
 .landing-page .btn:focus,
 .landing-page .nav-link:focus {
-  outline: 2px solid rgba(25, 118, 210, 0.25);
+  outline: 2px solid rgba(255, 215, 0, 0.5);
   outline-offset: 2px;
+}
+
+/* Add some subtle animations */
+.landing-page {
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.btn {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+    background 0.2s ease-out;
+  will-change: transform;
+}
+
+.nav-link {
+  transition: transform 0.2s ease-out, box-shadow 0.2s ease-out,
+    background 0.2s ease-out;
+  will-change: transform;
 }

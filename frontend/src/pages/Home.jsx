@@ -133,7 +133,7 @@ function Home() {
           </div>
         </div>
         <div className="rightPanel">
-          <img src="/logo3.png" alt="" />
+          <img src="/woman.jpg" alt="" />
         </div>
       </div>
     </>
