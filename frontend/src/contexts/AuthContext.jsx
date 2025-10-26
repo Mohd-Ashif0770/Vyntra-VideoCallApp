@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
       }
 
       toast.success("Login successful!");
-      navigate("/dashboard");
+      navigate("/home");
     } catch (err) {
       // 👇 Catch backend error messages safely
       if (err.response && err.response.data && err.response.data.message) {
@@ -64,9 +64,38 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const getHistoryOfUser = async () => {
+    try {
+      const response = await client.get("/get_all_activity", {
+        params: {
+          token: localStorage.getItem("token"),
+        },
+      });
+      return response.data;
+    } catch (err) {
+      toast.error("Failed to fetch meeting history");
+      throw err;
+    }
+  };
+
+  const addToUserHistory = async (meetingCode) => {
+    try {
+      const response = await client.post("/add_to_activity", {
+        token: localStorage.getItem("token"),
+        meetingCode,
+      });
+      return response.data;
+    } catch (err) {
+      toast.error("Failed to save meeting to history");
+      throw err;
+    }
+  };
+
   const data = {
     userData,
     setUserData,
+    getHistoryOfUser,
+    addToUserHistory,
     handleRegister,
     handleLogin,
   };

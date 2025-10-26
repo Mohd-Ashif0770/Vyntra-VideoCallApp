@@ -1,46 +1,51 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import "../styles/Landing.css";
 
 export default function Landing() {
   return (
-    <div className="landingPageContainer">
-      <nav className="navContainer">
-        <div>
-          <Link to={"/home"} className="navLogo">
+    <main className="landing-page">
+      <header className="landing-nav">
+        <div className="landing-brand">
+          <Link to={"/home"} className="nav-logo">
             Vyntra
           </Link>
         </div>
-        <div className="navList">
-          <div className="navOptions">
-            <Link to={"/guest"} className="navItem">
-              Join as Guest
-            </Link>
-            <Link to={"/auth"} className="navItem">
-              Register
-            </Link>
-            <Link to={"/auth"} className="navItem" id="loginBtn">
-              Login
-            </Link>
-          </div>
-        </div>
-      </nav>
-      <div className="imageContainer">
-        <div className="leftContainer">
-          <h1>
-            <span style={{ color: "#ff9839" }}>Connect</span> with your <br />{" "}
-            Loved Ones
+        <nav className="landing-nav-links">
+          <Link to={"/guest"} className="nav-link">
+            Join as Guest
+          </Link>
+          <Link to={"/auth"} className="nav-link">
+            Register
+          </Link>
+          <Link to={"/auth"} className="nav-link nav-link--button">
+            Login
+          </Link>
+        </nav>
+      </header>
+
+      <section className="hero">
+        <div className="hero-left">
+          <h1 className="hero-title">
+            <span className="accent">Connect</span> with your
+            <br /> Loved Ones
           </h1>
-          <p className="leftPara">Cover a distance by Vyntra</p>
-          <div role="button">
-            <Link to={"/auth"} className="getStartedBtn">
+          <p className="hero-sub">
+            Cover the distance with Vyntra — secure, fast video calls.
+          </p>
+          <div className="hero-ctas">
+            <Link to={"/auth"} className="btn btn-primary">
               Get Started
             </Link>
+            <Link to={"/guest"} className="btn btn-outline">
+              Join as Guest
+            </Link>
           </div>
         </div>
-        <div className="rightContainer">
-          <img src="mobile.png" alt="mobile-image" />
+        <div className="hero-right" aria-hidden>
+          {/* background image handled in CSS to avoid layout shift; falls back to /background.png */}
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

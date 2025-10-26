@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, } from "react";
 import { TextField, Button, IconButton, Badge } from "@mui/material";
 import {
   Videocam,
@@ -12,6 +12,8 @@ import {
 } from "@mui/icons-material";
 import { io } from "socket.io-client";
 import "../styles/VideoMeet.css";
+import { useNavigate } from "react-router-dom";
+
 
 // ===============================
 // 🌐 Global Configurations
@@ -49,6 +51,8 @@ export default function VideoMeet() {
   const [newMessage, setNewMessage] = useState("");
   const [unreadCount, setUnreadCount] = useState(0);
   const chatMessagesRef = useRef(null);
+
+  const navigate = useNavigate()
 
   // ===============================
   // 🔒 Request Permissions
@@ -480,6 +484,16 @@ export default function VideoMeet() {
     }
   };
 
+  const handleCallEnd = ()=>{
+    try{
+      let tracks = localVideoRef.current.srcObject.getTracks();
+      tracks.forEach(track => track.stop())
+
+    }catch(e){console.log(e)}
+
+    navigate("/home")
+  }
+
   // ===============================
   // 🖼️ UI Layout
   // ===============================
@@ -601,7 +615,7 @@ export default function VideoMeet() {
               {video ? <Videocam /> : <VideocamOff />}
             </IconButton>
 
-            <IconButton className="control-btn end-call">
+            <IconButton className="control-btn end-call" onClick={handleCallEnd}>
               <CallEnd />
             </IconButton>
 

@@ -1,4 +1,5 @@
 import { User } from "../models/user.model.js";
+import { Meeting } from "../models/meeting.model.js";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
@@ -82,4 +83,33 @@ const Login = async (req, res) => {
   }
 };
 
-export { Register, Login };
+const getUserHistory = async (req, res)=>{
+  const{token} = req.query;
+
+  try{
+    const user = await User.findOne({token:token});
+    const meetings = await Meeting.find({user_id:user.username})
+    res.json(meetings);
+  }catch(e){
+    res.json({message: `Something went wrong ${e}`});
+  }
+}
+
+const addToHistory = async (req, res)=>{
+  const {token, meetingCode} = req.body;
+
+  try{
+    const user = await User.findOne({token:token});
+    const newMeeting = new Meeting({
+      user_id: user.username,
+      meetingCode:meetingCode,
+    })
+
+    await newMeeting.save();
+    res.status(200).json({message:`Added code to history`})
+  }catch(e){
+    res.json({message:`Something went wrong`})
+  }
+}
+
+export { Register, Login, addToHistory, getUserHistory };

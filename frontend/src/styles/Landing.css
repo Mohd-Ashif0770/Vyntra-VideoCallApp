@@ -1,0 +1,165 @@
+/* Scoped landing page styles to avoid overriding other files */
+.landing-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  /* new soft mint-blue gradient for a fresh look */
+  background: linear-gradient(180deg, #eefaf6 0%, #f6fbff 65%);
+  color: #0f172a;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial;
+}
+
+/* Nav */
+.landing-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.5rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  /* translucent navbar with backdrop blur for a modern look */
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+}
+
+.nav-logo {
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 1.45rem;
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.landing-nav-links {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.nav-link {
+  color: rgba(15, 23, 42, 0.8);
+  text-decoration: none;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  background: rgba(25, 118, 210, 0.06);
+}
+
+.nav-link--button {
+  background: linear-gradient(90deg, #1976d2, #2e7dff);
+  color: white;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 6px 18px rgba(46, 125, 255, 0.18);
+}
+
+/* Hero */
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 2.5rem auto;
+  padding: 1rem;
+}
+
+.hero-left {
+  flex: 1;
+  max-width: 620px;
+}
+
+.hero-title {
+  font-size: 2.5rem;
+  margin: 0 0 1rem 0;
+  line-height: 1.05;
+  color: #07102a;
+}
+
+.accent {
+  color: #ff9839;
+}
+
+.hero-sub {
+  margin-bottom: 1.5rem;
+  color: #4b5563;
+  font-size: 1.05rem;
+}
+
+.hero-ctas {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  text-decoration: none;
+  padding: 0.65rem 1.1rem;
+  font-weight: 600;
+}
+
+.btn-primary {
+  background: linear-gradient(90deg, #1976d2, #2e7dff);
+  color: white;
+}
+
+.btn-outline {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+  background: white;
+}
+
+/* Hero right: use a high-quality background image from public folder */
+.hero-right {
+  flex: 1;
+  min-height: 420px;
+  border-radius: 12px;
+  background-image: url("/background.png");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  box-shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+}
+
+/* Accessibility: ensure contrast for small screens */
+@media (max-width: 900px) {
+  .hero {
+    flex-direction: column-reverse;
+    align-items: center;
+    text-align: center;
+  }
+
+  .hero-right {
+    width: 90%;
+    min-height: 260px;
+  }
+
+  .hero-left {
+    width: 100%;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .landing-nav {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Small adjustments to avoid global overrides */
+.landing-page .btn:focus,
+.landing-page .nav-link:focus {
+  outline: 2px solid rgba(25, 118, 210, 0.25);
+  outline-offset: 2px;
+}

@@ -1,0 +1,203 @@
+/* Base styles */
+.home-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Navigation Bar */
+.navBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background-color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.logoContainer h2 {
+  color: #1976d2;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.navOptions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.navOptions p {
+  margin: 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+/* Meeting Container */
+.meetContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 80px);
+}
+
+.leftPanel {
+  flex: 1;
+  padding: 2rem;
+}
+
+.leftPanel hp {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+}
+
+.leftPanel > div {
+  max-width: 500px;
+}
+
+.meeting-input-container {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 2rem;
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.meeting-input-container .meeting-input {
+  flex: 1;
+}
+
+.meeting-input-container .MuiTextField-root {
+  background-color: white;
+}
+
+.meeting-input-container .MuiOutlinedInput-root {
+  border-radius: 4px;
+}
+
+.meeting-input-container .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(25, 118, 210, 0.3);
+}
+
+.meeting-input-container
+  .MuiOutlinedInput-root:hover
+  .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(25, 118, 210, 0.5);
+}
+
+.meeting-input-container
+  .MuiOutlinedInput-root.Mui-focused
+  .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2;
+  border-width: 2px;
+}
+
+.meeting-input-container .MuiInputLabel-root {
+  color: #666;
+}
+
+.meeting-input-container .MuiInputLabel-root.Mui-focused {
+  color: #1976d2;
+}
+
+.meeting-input-container .join-button {
+  height: 56px;
+  min-width: 120px;
+  font-weight: 600;
+  text-transform: none;
+  font-size: 1.1rem;
+}
+
+.rightPanel {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+}
+
+.rightPanel img {
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* Meeting History Dialog */
+.MuiDialog-paper {
+  min-width: 400px;
+}
+
+.MuiDialogTitle-root {
+  background-color: #1976d2;
+  color: white;
+}
+
+.MuiList-root {
+  padding: 1rem;
+}
+
+.MuiListItem-root {
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.MuiListItem-root:hover {
+  background-color: #f5f5f5;
+}
+
+.MuiListItemText-primary {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+.MuiListItemText-secondary {
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .meetContainer {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  .leftPanel,
+  .rightPanel {
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .leftPanel hp {
+    font-size: 2rem;
+  }
+
+  .leftPanel .MuiTextField-root {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+
+  .navBar {
+    padding: 0.5rem 1rem;
+  }
+
+  .logoContainer h2 {
+    font-size: 1.5rem;
+  }
+}
