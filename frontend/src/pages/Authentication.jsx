@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { AuthContext } from "../contexts/authContext";
+import { AuthContext } from "../contexts/AuthContext.jsx";
 
 export function Authentication() {
   const [name, setName] = useState("");
