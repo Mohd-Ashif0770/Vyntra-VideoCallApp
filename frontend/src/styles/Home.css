@@ -81,6 +81,7 @@
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+
   min-height: calc(100vh - 80px);
   position: relative;
   z-index: 1;
@@ -91,9 +92,9 @@
   padding: 2rem;
 }
 
-.leftPanel hp {
+.leftPanel h4 {
   display: block;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: bold;
   color: white;
   margin-bottom: 2rem;
@@ -177,7 +178,7 @@
 /* Meeting History Dialog */
 .MuiDialog-paper {
   min-width: 400px;
-  border-radius: 20px;
+  border-radius: 300px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border: 2px solid rgba(255, 255, 255, 0.2);
@@ -186,7 +187,7 @@
 .MuiDialogTitle-root {
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  border-radius: 20px 20px 0 0;
+  border-radius: 0px 0px 0 0;
   font-weight: 700;
 }
 
@@ -196,13 +197,13 @@
 
 .MuiListItem-root {
   margin-bottom: 0.5rem;
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid rgba(102, 126, 234, 0.1);
 }
 
 .MuiListItemText-primary {
   color: #667eea;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .MuiListItemText-secondary {
@@ -212,8 +213,15 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .meetContainer {
-    flex-direction: column;
+    flex-direction: column-reverse;
     padding: 1rem;
+  }
+  .navOptions p{
+    display: none;
+  }
+  .rightPanel img{
+    height: auto;
+    width: 90vw;
   }
 
   .leftPanel,

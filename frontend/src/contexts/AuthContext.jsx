@@ -65,6 +65,21 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const addToUserHistory = async (meetingCode) => {
+    try {
+      const response = await client.post("/add_to_activity", {
+        token: localStorage.getItem("token"),
+        meetingCode,
+      });
+      console.log("✅ Add meeting response:", response.data);
+      return response.data;
+    } catch (err) {
+      console.error("❌ Add meeting error:", err);
+      toast.error("Failed to save meeting to history");
+      throw err;
+    }
+  };
+  
   const getHistoryOfUser = async () => {
     try {
       const response = await client.get("/get_all_activity", {
@@ -72,31 +87,51 @@ export const AuthProvider = ({ children }) => {
           token: localStorage.getItem("token"),
         },
       });
-      return response.data;
+  
+      console.log("📜 Get history response:", response.data);
+  
+      // ✅ Handle both formats: direct array OR wrapped in { data: [...] }
+      if (Array.isArray(response.data)) {
+        return response.data;
+      } else if (Array.isArray(response.data.data)) {
+        return response.data.data;
+      } else {
+        console.warn("⚠️ Unexpected response format:", response.data);
+        return [];
+      }
     } catch (err) {
       toast.error("Failed to fetch meeting history");
-      throw err;
+      console.error("❌ Error fetching meeting history:", err);
+      return [];
     }
   };
 
-  const addToUserHistory = async (meetingCode) => {
+  const deleteSingleHistory = async (meetingId) => {
     try {
-      const response = await client.post("/add_to_activity", {
-        token: localStorage.getItem("token"),
-        meetingCode,
+      const response = await client.delete("/delete_single_activity", {
+        params: {
+          token: localStorage.getItem("token"),
+          meetingId,
+        },
       });
+      toast.success("Meeting deleted successfully!");
       return response.data;
     } catch (err) {
-      toast.error("Failed to save meeting to history");
+      toast.error("Failed to delete meeting");
+      console.error("❌ Error deleting single meeting:", err);
       throw err;
     }
   };
+  
+  
+  
 
   const data = {
     userData,
     setUserData,
     getHistoryOfUser,
     addToUserHistory,
+    deleteSingleHistory,
     handleRegister,
     handleLogin,
   };

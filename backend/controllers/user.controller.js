@@ -112,4 +112,43 @@ const addToHistory = async (req, res)=>{
   }
 }
 
-export { Register, Login, addToHistory, getUserHistory };
+
+// Delete a single meeting
+const deleteHistory = async (req, res) => {
+  const { token, meetingId } = req.query;
+
+  if (!token || !meetingId) {
+    return res.status(400).json({ message: "Missing token or meetingId" });
+  }
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded?.id) {
+      return res.status(401).json({ message: "Invalid token" });
+    }
+
+    // Find user
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete meeting
+    const deleted = await Meeting.findOneAndDelete({
+      _id: meetingId,
+      user_id: user.username, // match how you save meetings
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Meeting not found or unauthorized" });
+    }
+
+    return res.status(200).json({ message: "Meeting deleted successfully" });
+  } catch (err) {
+    console.error("❌ Error deleting meeting:", err);
+    return res.status(500).json({ message: "Internal server error", error: err.message });
+  }
+};
+
+export { Register, Login, addToHistory, getUserHistory, deleteHistory };

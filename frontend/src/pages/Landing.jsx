@@ -19,7 +19,7 @@ export default function Landing() {
               data-bs-toggle="collapse"
               data-bs-target="#navbarTogglerDemo03"            
             >
-              <span class="navbar-toggler-icon"></span>
+              <span className="navbar-toggler-icon"></span>
             </button>
 
             {/* <div class="collapse navbar-collapse" id="navbarTogglerDemo03"> */}
@@ -57,6 +57,7 @@ export default function Landing() {
         </div>
         <div className="hero-right" aria-hidden>
           {/* background image handled in CSS to avoid layout shift; falls back to /background.png */}
+          {/* <img src="/forHomePage.jpg" alt="" /> */}
         </div>
       </section>
     </main>
