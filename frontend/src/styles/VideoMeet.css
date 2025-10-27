@@ -254,7 +254,7 @@ body {
 /* Local Video */
 .local-video-container {
   position: fixed;
-  bottom: 2rem;  
+  bottom: 2rem;
   right: 2rem;
   height: 25vh;
   width: auto;
@@ -262,12 +262,12 @@ body {
   border-radius: 10px;
   border: 2px solid #00bfa6;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  
+
   z-index: 10; /* ensures video stays above background but below control buttons */
 }
 
 .meetUserVideo {
-  height: 100%; 
+  height: 100%;
   width: 100%;
   border-radius: 10px;
   object-fit: cover;
@@ -302,13 +302,15 @@ body {
   justify-content: center;
   gap: 1.5rem;
   width: 100%;
-  height: calc(100vh - 150px);
-  padding-top: 3rem;
+  height: 100vh;
+  padding-top: 2rem;
 }
 
 .remoteVideo {
-  height: 40vh;
-  width: auto;
+  height: 30vh;
+  width: 20vw;
+  margin-bottom: 0px;
+  /* margin-bottom: -200px; */
   background-color: black;
   border-radius: 12px;
   border: 2px solid #1e90ff;
@@ -449,4 +451,40 @@ body {
     top: auto;
     bottom: 10px;
   }
+  .local-video-container {
+    bottom: 7rem;
+    width: auto;
+    height: 6rem;
+    object-fit: cover;
+  }
+  .mic-muted-indicator {
+    width: 4rem;
+    font-size: 0.5rem;
+    padding: 0.2rem;
+  }
+  .buttonContainer {
+    width: 85vw;
+    z-index: 1000;
+  }
+  .buttonContainer svg {
+    font-size: 1.2rem;
+  }
+  .remoteVideosContainer {
+    padding: 0;
+    gap: 0.8rem;
+    height: 16rem;
+    display: flex;
+    margin-top: -300px;
+    /* background-color: #45a049; */
+  }
+  .remoteVideo {
+    width: auto;
+    height: 8rem;
+    padding: 0;
+    margin-bottom: 0px;
+    gap: 0.2rem;
+  }
+}
+.remoteVideosContainer div {
+  height: 130px;
 }
